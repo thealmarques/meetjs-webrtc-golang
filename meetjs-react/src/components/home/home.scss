@@ -1,0 +1,95 @@
+.container {
+    height: 100%;
+    width: 100%;
+    background-color: #8C55A3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    .header {
+        padding: 20px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &__logo {
+            width: 60px;
+            height: 60px;
+        }
+
+        &__text {
+            margin-left: 12px;
+            font-size: 24px;
+            font-family: 'Quicksand-Bold';
+            color: #ed7655;
+
+            &:hover {
+                color: white;
+            }
+        }
+    }
+
+    .main {
+        width: 50%;
+        margin-top: 7%;
+        align-items: center;
+        justify-content: space-between;
+        display: flex;
+        flex-wrap: wrap;
+
+        &__features {
+            display: flex;
+            flex-direction: column;
+
+            &__text {
+                font-family: 'Quicksand-Bold';
+                padding-bottom: 35px;
+                color: white;
+                font-size: 20px;
+
+                &:hover {
+                    color: #ed7655;
+                }
+            }
+        }
+
+        &__start-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 15vw;
+            height: 4vw;
+            background-color: #12B4F0;
+            border-radius: 30px;
+            cursor: pointer;
+            letter-spacing: 1.3px;
+            user-select: none;
+
+            color: white;
+            font-family: 'Quicksand-Bold';
+            font-size: 20px;
+
+            &:hover {
+                background-color: #ed7655;
+            }
+        }
+    }
+
+    .footer {
+        position: absolute;
+        bottom: 5px;
+
+        &__item {
+            font-family: 'Quicksand-Bold';
+            font-family: 12px;
+            color: white;
+            margin-right: 10px;
+            cursor: pointer;
+
+            &:hover {
+                color: #ed7655;
+            }
+        }
+    }
+}
