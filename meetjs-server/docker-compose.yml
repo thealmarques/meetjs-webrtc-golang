@@ -1,0 +1,21 @@
+version: "3.2"
+services:
+  mongo-database:
+    restart: always
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb_data_container:/data/db
+    networks: 
+        - meetjs
+
+volumes:
+    mongodb_data_container:
+
+networks: 
+    meetjs:
+        driver: bridge
