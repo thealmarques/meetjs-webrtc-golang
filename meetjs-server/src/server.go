@@ -38,7 +38,8 @@ func main() {
 	})
 
 	router.POST("/session", controllers.CreateSession)
-	router.POST("/connect", controllers.GetSession)
+	router.GET("/connect", controllers.GetSession)
+	router.POST("/connect/:socket", controllers.ConnectSession)
 
 	router.Run("0.0.0.0:9000")
 }
