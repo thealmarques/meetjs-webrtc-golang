@@ -1,13 +1,16 @@
 import React from 'react';
 import './App.scss';
-import { BrowserRouter as Router, Redirect, Route, Switch } from 'react-router-dom';
+import { Router, Redirect, Route, Switch  } from "react-router";
 import { Home } from './components/home/home';
 import { Meeting } from './components/meeting/meeting';
+import { createBrowserHistory } from "history";
 
 function App() {
+  const history = createBrowserHistory();
+
   return (
     <div className="app">
-      <Router>
+      <Router history={history}>
         <Switch>
           <Route exact path="/meeting/*">
             <Meeting></Meeting>

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64.218" height="51" viewBox="0 0 64.218 51">
+  <g id="video-off" transform="translate(0 -52.694)">
+    <g id="Grupo_7" data-name="Grupo 7" transform="translate(0 52.694)">
+      <g id="Grupo_6" data-name="Grupo 6" transform="translate(0 0)">
+        <path id="Caminho_6" data-name="Caminho 6" d="M202.143,112.046h-6.02a2.007,2.007,0,0,0-1.425.582l-4.014,4.014,2.83,2.83,3.432-3.412h3.191v28.1h-3.191l-3.432-3.432a2.007,2.007,0,0,0-1.4-.582h-6.02a2.007,2.007,0,0,0-2.007,2.007v4.014a2.007,2.007,0,0,1-2.007,2.007H160v4.014h22.075a6.02,6.02,0,0,0,6.02-6.02v-2.007h3.191l3.432,3.432a2.007,2.007,0,0,0,1.4.582h6.02a2.007,2.007,0,0,0,2.007-2.007V114.053A2.007,2.007,0,0,0,202.143,112.046Z" transform="translate(-139.932 -104.601)" fill="#ce0b29"/>
+        <path id="Caminho_7" data-name="Caminho 7" d="M42.143,84.06V80.046H6.02A6.02,6.02,0,0,0,0,86.066v32.109H4.014V86.066A2.007,2.007,0,0,1,6.02,84.06H42.143Z" transform="translate(0 -76.615)" fill="#ce0b29"/>
+        <rect id="Retângulo_15" data-name="Retângulo 15" width="68.112" height="4.014" transform="translate(4.603 48.162) rotate(-45)" fill="#ce0b29"/>
+      </g>
+    </g>
+  </g>
+</svg>

@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
+import { useHistory } from "react-router";
 import './home.scss';
 import logo from '../../assets/images/logo.svg';
 import { createSession } from '../../services/api-request.services';
+import { ResponseData } from '../../interfaces/ResponseData';
 
 export const Home = () => {
   const [host, setHost] = useState<string>('');
   const [title, setTitle] = useState<string>('');
   const [password, setPassword] = useState<string>('');
+  const history = useHistory();
 
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    createSession(host, title, password).then((response: Response) => {
-      alert(response.status);
+    createSession(host, title, password).then((response: Response & ResponseData) => {
+      history.push(`/meeting/${response.data.socket}`);
     }).catch((error: Error) => {
       console.error(error.message)
     });
@@ -34,9 +37,9 @@ export const Home = () => {
         <span className="body__sub-title">Get you own URL and share it with others to join you.</span>
         <form onSubmit={onSubmit} className="body__form">
           <div className="body__form__inputs">
-            <input placeholder="Host" className="body__form__inputs__input" type="text" value={host} onChange={(event)=> setHost(event.target.value)} required />
-            <input placeholder="Title" className="body__form__inputs__input" type="text" value={title} onChange={(event)=> setTitle(event.target.value)} required />
-            <input placeholder="Password" className="body__form__inputs__input" type="password" value={password} onChange={(event)=> setPassword(event.target.value)} required />
+            <input placeholder="Host" className="body__form__inputs__input" type="text" value={host} onChange={(event) => setHost(event.target.value)} required autoComplete={"on"}/>
+            <input placeholder="Title" className="body__form__inputs__input" type="text" value={title} onChange={(event)=> setTitle(event.target.value)} required autoComplete={"on"}/>
+            <input placeholder="Password" className="body__form__inputs__input" type="password" value={password} onChange={(event)=> setPassword(event.target.value)} required autoComplete={"on"}/>
           </div>
           <div className="body__form__create">
             <button className="body__form__create__btn" type="submit">Create</button>

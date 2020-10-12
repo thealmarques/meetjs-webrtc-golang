@@ -1,0 +1,125 @@
+.meeting {
+    height: 100%;
+    width: 100%;
+    background-color: #8C55A3;
+    overflow: scroll;
+
+    &__header {
+        padding: 20px;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        &__left {
+            display: flex;
+            align-items: center;
+
+            &__logo {
+                width: 60px;
+                height: 60px;
+                color: white;
+            }
+
+            &__text {
+                margin-left: 10px;
+                font-size: 20px;
+                font-family: 'Quicksand-Bold';
+                color: white;
+
+                &:hover {
+                    color: white;
+                }
+            }
+        }
+
+        &__right {
+            cursor: pointer;
+            display: flex;
+            color: white;
+            font-family: 'Quicksand-Bold';
+
+            &__margin {
+                margin-right: 7px;
+            }
+        }
+    }
+
+    &__body {
+        width: 100%;
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        &__info {
+            margin-top: 10%;
+            color: white;
+            font-family: 'Quicksand-Bold';
+            text-align: center;
+        }
+
+        &__spinner {
+            margin-top: 10%;
+        }
+
+        &__bar {
+            position: absolute;
+            bottom: 20px;
+            width: 60vw;
+            height: 45px;
+            background-color: #ED7655;
+            border-radius: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            &__left-bar {
+                height: 100%;
+                display: flex;
+                align-items: center;
+
+                &__status {
+                    width: 8vw;
+                    height: 100%;
+                    border-radius: 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    color: white;
+                    font-size: 1.2vw;
+                    font-family: 'Quicksand-Bold';
+                    cursor: pointer;
+                    user-select: none;
+
+                    &-inactive {
+                        background-color: #CE0B29;
+                    }
+
+                    &-active {
+                        background-color: #299B43;
+                    }
+                }
+
+                &__title {
+                    font-size: 1.2vw;
+                    color: white;
+                    margin-left: 10px;
+                    text-align: center;
+                    font-family: 'Quicksand-Bold';
+                }
+            }
+
+            &__right-bar {
+                margin-right: 10px;
+
+                &__icon {
+                    margin-right: 15px;
+                    width: 2vw;
+                    height: 2vw;
+                    cursor: pointer;
+                }
+            }
+        }
+    }
+}
