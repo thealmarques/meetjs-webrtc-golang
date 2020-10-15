@@ -26,6 +26,6 @@ func CreateSession(ctx *gin.Context) {
 	result, _ := collection.InsertOne(ctx, session)
 	insertedID := result.InsertedID.(primitive.ObjectID).Hex()
 
-	hashedSession := CreateSocket(session, ctx, insertedID)
-	ctx.JSON(http.StatusOK, gin.H{"socket": hashedSession})
+	url := CreateSocket(session, ctx, insertedID)
+	ctx.JSON(http.StatusOK, gin.H{"socket": url})
 }
