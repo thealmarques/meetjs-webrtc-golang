@@ -1,5 +1,5 @@
 import Axios from "axios";
-import { ResponseData } from "../interfaces/ResponseData";
+import { ResponseData } from "../interfaces/response-data";
 
 export function createSession(host: string, title: string, password: string): Promise<Response & ResponseData> {
   return Axios.post('http://localhost:9000/session', JSON.stringify({
@@ -18,10 +18,10 @@ export function connectSession(host: string, password: string, socket: string): 
   );
 }
 
-export function verifySocket(socket: string): Promise<Response> {
+export function verifySocket(url: string): Promise<Response> {
   return Axios.get('http://localhost:9000/connect', {
     params: {
-      socket
+      url
     }
   });
 }

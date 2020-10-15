@@ -14,9 +14,7 @@ export const SessionCredentials = (props: Props) => {
   const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     props.connect(host, password);
-    setTimeout(() => {
-      setSubmitted(true);
-    }, 200);
+    setSubmitted(true);
   }
 
   return (

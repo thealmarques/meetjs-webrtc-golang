@@ -3,7 +3,7 @@ import { useHistory } from "react-router";
 import './home.scss';
 import logo from '../../assets/images/logo.svg';
 import { createSession } from '../../services/api-request.services';
-import { ResponseData } from '../../interfaces/ResponseData';
+import { ResponseData } from '../../interfaces/response-data';
 
 export const Home = () => {
   const [host, setHost] = useState<string>('');
