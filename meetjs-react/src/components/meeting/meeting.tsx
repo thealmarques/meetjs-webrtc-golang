@@ -7,29 +7,35 @@ import micOff from '../../assets/images/mic-off.svg';
 import camOn from '../../assets/images/cam-on.svg';
 import camOff from '../../assets/images/cam-off.svg';
 import { SessionCredentials } from '../session-modal/modal';
-import { useHistory } from "react-router";
 import './meeting.scss';
 import { ResponseData } from '../../interfaces/response-data';
-import Loader from 'react-loader-spinner'
 import { ConnectionSocket } from '../../services/connection-socket.services';
 import { generateId } from '../../utils/identifier.utils';
 import { SocketEvent, SocketResponse } from '../../interfaces/socket-data';
 import { State } from '../state-machine/state-machine';
+import { STUN_SERVERS } from '../../constants/stun-servers';
+import { EasyRTC } from '../../utils/easy-rtc';
+import { useBeforeunload } from 'react-beforeunload';
 
 export const Meeting = () => {
   const location = useLocation();
-  const [url, setUrl] = useState<string>(location.pathname.split('/meeting/')[1]);
   const [state, setState] = useState<State>(State.INVALID);
   const [title, setTitle] = useState<string>('');
-  const localVideo = useRef<HTMLVideoElement>(null);
-  const [socket, setSocket] = useState<string>('')
-  const [audio, setAudio] = useState<boolean>(false);
-  const [video, setVideo] = useState<boolean>(false);
-  const [audioTrack, setAudioTrack] = useState<MediaStreamTrack>(false);
-  const [videoTrack, setVideoTrack] = useState<MediaStreamTrack>(false);
+  const [audio, setAudio] = useState<boolean>();
+  const [video, setVideo] = useState<boolean>();
   const [connection, setConnection] = useState<ConnectionSocket>();
   const [users, setUsers] = useState<string[]>([]);
-  const [userId, setUserId] = useState<number>(generateId());
+  const [url] = useState<string>(location.pathname.split('/meeting/')[1]);
+  const [ localStream, setLocalStream ] = useState<MediaStream>(null);
+  const localVideo = useRef<HTMLVideoElement>(null);
+  const userId = useRef<string>(generateId());
+
+  useBeforeunload((event: Event) => {
+    event.preventDefault();
+    if (connection) {
+      connection.send('disconnect', userId.current);
+    }
+  });
 
   useEffect(() => {
     let unmounted = false;
@@ -54,7 +60,6 @@ export const Meeting = () => {
   const connect = (host: string, password: string) => {
     connectSession(host, password, url).then((response: Response & ResponseData) => {
       setTitle(response.data.title);
-      setSocket(response.data.socket);
       setState(State.LOGGED);
     }).catch((error) => {
       setState(State.INVALID);
@@ -78,9 +83,11 @@ export const Meeting = () => {
         navigator.getUserMedia(
           { audio: true, video: true },
           stream => {
-            setAudioTrack(stream.getAudioTracks()[0]);
-            setVideoTrack(stream.getVideoTracks()[0]);
             localVideo.current.srcObject = stream;
+            setLocalStream(stream);
+
+            setAudio(true);
+            setVideo(true);
           },
           error => console.warn(error.message)
         );
@@ -89,57 +96,112 @@ export const Meeting = () => {
   }, [state]);
 
   useEffect(() => {
-    if (state >= 3) {
-      const media: MediaStream = localVideo.current.srcObject;
-      
-      if (!audio) {
-        media.removeTrack(audioTrack);
-      } else {
-        media.addTrack(audioTrack);
-      }
+    if (localStream) {
+      const media: MediaStream = localStream;
+      media.getTracks().forEach((track: MediaStreamTrack) => {
+        if (track.kind === 'audio') {
+          track.enabled = !track.enabled;
+        }
+      });
     }
-  }, [audio]);
+  }, [localStream, audio]);
 
   useEffect(() => {
-    if (state >= 3) {
-      const media: MediaStream = localVideo.current.srcObject;
-      
-      if (!video) {
-        media.removeTrack(videoTrack);
-      } else {
-        media.addTrack(videoTrack);
-      }
+    if (localStream) {
+      const media: MediaStream = localStream;
+      media.getTracks().forEach((track: MediaStreamTrack) => {
+        if (track.kind === 'video') {
+          track.enabled = !track.enabled;
+        }
+      });
     }
-  }, [video]);
+  }, [localStream, video]);
 
   useEffect(() => {
     if (state === 3 && connection) {
-      connection.send('leave', 'disconnect', userId);
-      setConnection(false);
+      connection.send('disconnect', userId.current);
+      setConnection(null);
+      setUsers([]);
     }
-  }, [state]);
+  }, [state, connection]);
 
   useEffect(() => {
     if (state > 3) {
       const socketConnection = new ConnectionSocket('ws://localhost:9000/ws');
+      const remoteStreams: MediaStream[] = [];
+      const rtcPeerConnection: EasyRTC[] = [];
+
       const onConnectionReady = () => {
-        socketConnection.send('join', 'connect', userId);
-        setTimeout(() => {
-          socketConnection.send('join', 'connect', 'kkio1982bb');
-        }, 200)
+        socketConnection.send('connect', userId.current);
       }
 
       const onMessage = (event: Event & SocketEvent) => {
         const data: SocketResponse = JSON.parse(event.data);
-        if (data.type === 'connect') {
-          setUsers((prevState) => {
-            return prevState.concat(data.userID)
+        
+        if (!rtcPeerConnection[data.userID] && userId.current !== data.userID) {    
+          if (!remoteStreams[data.userID]) {
+            remoteStreams[data.userID] = new MediaStream();
+          }
+          rtcPeerConnection[data.userID] = new EasyRTC(STUN_SERVERS, localVideo.current.srcObject);
+          
+          rtcPeerConnection[data.userID].onIceCandidate((event: RTCPeerConnectionIceEvent) => {
+            if (event.candidate) {
+              socketConnection.candidate(event.candidate, userId.current);
+            }
+          });
+
+          rtcPeerConnection[data.userID].onTrack((event: RTCTrackEvent) => {
+            const mediaStream: MediaStream = remoteStreams[data.userID];
+            mediaStream.addTrack(event.track);
+            
+            const element = document.getElementById(`${data.userID}-video`) as HTMLMediaElement;
+            element.srcObject = mediaStream;
           });
         }
+
+        switch (data.type) {
+          case 'session_joined':
+            socketConnection.send('start_call', userId.current);
+            break;
+          case 'start_call':
+            if (data.userID !== userId.current) {
+              setUsers((prevState: string[]) => prevState.indexOf(data.userID) < 0 ? prevState.concat(data.userID) : prevState);
+              rtcPeerConnection[data.userID].createOffer().then((description: RTCSessionDescriptionInit) => {
+                socketConnection.sendDescription('offer', description, userId.current, data.userID);
+              });
+            }
+            break;
+          case 'offer':
+            if (data.to === userId.current) {
+              setUsers((prevState: string[]) => prevState.indexOf(data.userID) < 0 ? prevState.concat(data.userID) : prevState);
+              rtcPeerConnection[data.userID].setRemoteDescription(new RTCSessionDescription(JSON.parse(data.description))).then(async () => {
+                const answer = await rtcPeerConnection[data.userID].createAnswer();
+                socketConnection.sendDescription('answer', answer, userId.current, data.userID);
+              });
+            }
+            break;
+          case 'answer':
+            if (data.to === userId.current) {
+              rtcPeerConnection[data.userID].receiveAnswer(JSON.parse(data.description));
+            }
+            break;
+          case 'ice':
+            if (userId.current !== data.userID && data.candidate) {
+              rtcPeerConnection[data.userID].addIceCandidate(JSON.parse(data.candidate));
+            }
+            break
+          case 'disconnect':
+            if (data.userID !== userId.current) {
+              remoteStreams[data.userID] = null;
+              rtcPeerConnection[data.userID] = null;
+              setUsers((prevState: string[]) => prevState.splice(prevState.indexOf(data.userID), 1));
+            }
+            break;
+        }
       }
-      
-      socketConnection.onMessage(onMessage);
+
       socketConnection.onOpen(onConnectionReady);
+      socketConnection.onMessage(onMessage);
       setConnection(socketConnection);
     }
   }, [state])
@@ -170,9 +232,8 @@ export const Meeting = () => {
                 return (
                   <video
                     key={index}
-                    id={`${user}-${index}-video`}
+                    id={`${user}-video`}
                     autoPlay
-                    muted
                     className="meeting__body__users__remote-video"></video>
                 )
               })

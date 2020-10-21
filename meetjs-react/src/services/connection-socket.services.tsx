@@ -1,4 +1,4 @@
-import { SocketEvent, SocketResponse } from "../interfaces/socket-data";
+import { SocketEvent } from "../interfaces/socket-data";
 
 export class ConnectionSocket {
   private connection: WebSocket;
@@ -24,13 +24,32 @@ export class ConnectionSocket {
 
   /**
    * Sends message through web sockets.
-   * @param message message to send
+   * @param data data to send
+   * @param type event type
+   * @param userID user id
+   * @param offer RTC offer
    */
-  send(message: string, type: string, userId: string) {
+  send(type: string, userID: string) {
     this.connection.send(JSON.stringify({
-      data: message,
-      type: type,
-      userID: userId
+      type,
+      userID
+    }));
+  }
+
+  sendDescription(type: string, description: RTCSessionDescriptionInit, userID: string, to: string) {
+    this.connection.send(JSON.stringify({
+      type,
+      userID,
+      description: JSON.stringify(description),
+      to
+    }));
+  }
+
+  candidate(candidate: RTCIceCandidate, userID: string) {
+    this.connection.send(JSON.stringify({
+      candidate: JSON.stringify(candidate),
+      userID,
+      type: 'ice'
     }));
   }
 
