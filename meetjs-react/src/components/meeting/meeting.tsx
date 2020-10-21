@@ -6,6 +6,7 @@ import micOn from '../../assets/images/mic-on.svg';
 import micOff from '../../assets/images/mic-off.svg';
 import camOn from '../../assets/images/cam-on.svg';
 import camOff from '../../assets/images/cam-off.svg';
+import view from '../../assets/images/view.svg';
 import { SessionCredentials } from '../session-modal/modal';
 import './meeting.scss';
 import { ResponseData } from '../../interfaces/response-data';
@@ -23,6 +24,7 @@ export const Meeting = () => {
   const [title, setTitle] = useState<string>('');
   const [audio, setAudio] = useState<boolean>();
   const [video, setVideo] = useState<boolean>();
+  const [viewMode, setViewMode] = useState<boolean>(false);
   const [connection, setConnection] = useState<ConnectionSocket>();
   const [users, setUsers] = useState<string[]>([]);
   const [url] = useState<string>(location.pathname.split('/meeting/')[1]);
@@ -226,7 +228,7 @@ export const Meeting = () => {
           )
         }
         {state === State.JOINED && (
-          <div className="meeting__body__users">
+          <div className={`meeting__body__users ${viewMode ? 'meeting__body__users-row' : 'meeting__body__users-column'}`}>
             {
               users.map((user, index) => {
                 return (
@@ -234,7 +236,7 @@ export const Meeting = () => {
                     key={index}
                     id={`${user}-video`}
                     autoPlay
-                    className="meeting__body__users__remote-video"></video>
+                    className={`meeting__body__users__remote-video ${viewMode ? 'meeting__body__users__remote-video-split' : ''}`}></video>
                 )
               })
             }
@@ -257,7 +259,8 @@ export const Meeting = () => {
                 {
                   state === State.JOINED &&
                   <span className="meeting__body__bar__right-bar__count">{users.length} online users</span>
-                }
+              }
+                <img className="meeting__body__bar__right-bar__icon" src={view} alt="Change view" onClick={() => setViewMode(!viewMode)} />
                 <img className="meeting__body__bar__right-bar__icon" src={audio ? micOn : micOff} alt="Mic" onClick={() => setAudio(!audio)} />
                 <img className="meeting__body__bar__right-bar__icon" src={video ? camOn : camOff} alt="Webcam" onClick={() => setVideo(!video)} />
               </div>

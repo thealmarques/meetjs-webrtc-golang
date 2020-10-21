@@ -54,12 +54,26 @@
 
         &__users {
             display: flex;
-            flex-direction: column;
             align-items: center;
+            flex-wrap: wrap;
+
+            &-row {
+                flex-direction: row;
+            }
+
+            &-column {
+                flex-direction: column;
+            }
+
             &__remote-video {
-                height: 80vh;
-                width: 70vw;
                 margin-bottom: 20px;
+                margin-right: 20px;
+                width: 40vw;
+
+                &-split {
+                    width: 35vw;
+                    justify-content: center;
+                }
             }
         }
 
