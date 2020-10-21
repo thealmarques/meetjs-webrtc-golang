@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"meetjs-server/src/controllers"
 	"meetjs-server/src/interfaces"
@@ -33,22 +32,41 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 	var message interfaces.Message
 	for {
 		err = conn.ReadJSON(&message)
-		for client := range clients {
-			err := client.WriteJSON(message)
-			if err != nil {
-				log.Printf("Websocket error: %s", err)
-				client.Close()
-				delete(clients, client)
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				log.Printf("error: %v", err)
+				delete(clients, conn)
 			}
-		}
-
-		if err != nil || message.Type == "disconnect" {
-			delete(clients, conn)
-			conn.Close()
 			break
 		}
+		switch message.Type {
+		case "connect":
+			message.Type = "session_joined"
+			err := conn.WriteJSON(message)
+			if err != nil {
+				log.Printf("Websocket error: %s", err)
+				delete(clients, conn)
+			}
+			break
+		case "disconnect":
+			delete(clients, conn)
 
-		fmt.Println(len(clients))
+			for client := range clients {
+				err := client.WriteJSON(message)
+				if err != nil {
+					client.Close()
+					delete(clients, client)
+				}
+			}
+			break
+		default:
+			for client := range clients {
+				err := client.WriteJSON(message)
+				if err != nil {
+					delete(clients, client)
+				}
+			}
+		}
 	}
 }
 

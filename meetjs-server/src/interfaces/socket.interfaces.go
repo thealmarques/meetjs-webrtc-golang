@@ -9,7 +9,9 @@ type Socket struct {
 
 // Message interface
 type Message struct {
-	Type   string `json:"type"`
-	Data   string `json:"data"`
-	UserID string `json:"userID"`
+	Type        string `json:"type"`
+	UserID      string `json:"userID"`
+	Description string `json:"description"`
+	Candidate   string `json:"candidate"`
+	To          string `json:"to"`
 }
