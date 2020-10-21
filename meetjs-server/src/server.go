@@ -6,6 +6,7 @@ import (
 	"meetjs-server/src/controllers"
 	"meetjs-server/src/interfaces"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -107,5 +108,13 @@ func main() {
 		wshandler(c.Writer, c.Request)
 	})
 
-	router.Run("0.0.0.0:9000")
+	router.Run("0.0.0.0:" + getenv("PORT", "9000"))
+}
+
+func getenv(key, fallback string) string {
+	value := os.Getenv(key)
+	if len(value) == 0 {
+		return fallback
+	}
+	return value
 }
