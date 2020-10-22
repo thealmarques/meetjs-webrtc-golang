@@ -19,16 +19,22 @@ var upgrader = websocket.Upgrader{
 		return true
 	},
 }
-var clients = make(map[*websocket.Conn]bool)
+var sockets = make(map[string]map[string]*websocket.Conn)
 
-func wshandler(w http.ResponseWriter, r *http.Request) {
+func wshandler(w http.ResponseWriter, r *http.Request, socket string) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Fatal("Error handling websocket connection.")
 		return
 	}
 
-	clients[conn] = true
+	defer conn.Close()
+
+	if sockets[socket] == nil {
+		sockets[socket] = make(map[string]*websocket.Conn)
+	}
+
+	clients := sockets[socket]
 
 	var message interfaces.Message
 	for {
@@ -36,35 +42,37 @@ func wshandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
-				delete(clients, conn)
 			}
 			break
 		}
+
+		clients[message.UserID] = conn
+
 		switch message.Type {
 		case "connect":
 			message.Type = "session_joined"
 			err := conn.WriteJSON(message)
 			if err != nil {
 				log.Printf("Websocket error: %s", err)
-				delete(clients, conn)
+				delete(clients, message.UserID)
 			}
 			break
 		case "disconnect":
-			delete(clients, conn)
+			delete(clients, message.UserID)
 
-			for client := range clients {
+			for user, client := range clients {
 				err := client.WriteJSON(message)
 				if err != nil {
 					client.Close()
-					delete(clients, client)
+					delete(clients, user)
 				}
 			}
 			break
 		default:
-			for client := range clients {
+			for user, client := range clients {
 				err := client.WriteJSON(message)
 				if err != nil {
-					delete(clients, client)
+					delete(clients, user)
 				}
 			}
 		}
@@ -79,7 +87,7 @@ func main() {
 		Password: "rootpassword",
 	}
 
-	clientOptions := options.Client().ApplyURI("mongodb://localhost:27017").SetAuth(credential)
+	clientOptions := options.Client().ApplyURI("mongodb://" + getenv("DB_URL", "localhost") + ":" + getenv("DB_PORT", "27017")).SetAuth(credential)
 	client, err := mongo.Connect(context.TODO(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
@@ -104,8 +112,9 @@ func main() {
 	router.POST("/connect/:url", controllers.ConnectSession)
 
 	// Websocket connection
-	router.GET("/ws", func(c *gin.Context) {
-		wshandler(c.Writer, c.Request)
+	router.GET("/ws/:socket", func(c *gin.Context) {
+		socket := c.Param("socket")
+		wshandler(c.Writer, c.Request, socket)
 	})
 
 	router.Run("0.0.0.0:" + getenv("PORT", "9000"))
