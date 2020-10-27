@@ -8,11 +8,12 @@ import (
 
 // Connection - Websocket connections
 type Connection struct {
-	Socket *websocket.Conn // websocket connection of the player
+	Socket *websocket.Conn
 	mu     sync.Mutex
 }
 
-func (c *Connection) send(message Socket) error {
+// Send - concurrency handling
+func (c *Connection) Send(message Message) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	return c.Socket.WriteJSON(message)

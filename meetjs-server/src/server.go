@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,7 +20,7 @@ var upgrader = websocket.Upgrader{
 		return true
 	},
 }
-var sockets = make(map[string]map[string]*websocket.Conn)
+var sockets = make(map[string]map[string]*interfaces.Connection)
 
 func wshandler(w http.ResponseWriter, r *http.Request, socket string) {
 	conn, err := upgrader.Upgrade(w, r, nil)
@@ -31,7 +32,7 @@ func wshandler(w http.ResponseWriter, r *http.Request, socket string) {
 	defer conn.Close()
 
 	if sockets[socket] == nil {
-		sockets[socket] = make(map[string]*websocket.Conn)
+		sockets[socket] = make(map[string]*interfaces.Connection)
 	}
 
 	clients := sockets[socket]
@@ -46,7 +47,11 @@ func wshandler(w http.ResponseWriter, r *http.Request, socket string) {
 			break
 		}
 
-		clients[message.UserID] = conn
+		if clients[message.UserID] == nil {
+			connection := new(interfaces.Connection)
+			connection.Socket = conn
+			clients[message.UserID] = connection
+		}
 
 		switch message.Type {
 		case "connect":
@@ -58,19 +63,18 @@ func wshandler(w http.ResponseWriter, r *http.Request, socket string) {
 			}
 			break
 		case "disconnect":
-			delete(clients, message.UserID)
-
 			for user, client := range clients {
-				err := client.WriteJSON(message)
+				err := client.Send(message)
 				if err != nil {
-					client.Close()
+					client.Socket.Close()
 					delete(clients, user)
 				}
 			}
+			delete(clients, message.UserID)
 			break
 		default:
 			for user, client := range clients {
-				err := client.WriteJSON(message)
+				err := client.Send(message)
 				if err != nil {
 					delete(clients, user)
 				}
@@ -81,6 +85,11 @@ func wshandler(w http.ResponseWriter, r *http.Request, socket string) {
 
 func main() {
 	router := gin.Default()
+
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{getenv("HOST_URL", "localhost")}
+
+	router.Use(cors.Default())
 
 	credential := options.Credential{
 		Username: "root",

@@ -13,6 +13,23 @@ services:
     networks: 
         - meetjs
 
+  server:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "9000:9000"
+    environment:
+      DB_URL: mongo-database
+      DB_PORT: 27017
+      PORT: 9000
+      HOST_URL: localhost
+    networks:
+      - meetjs
+    depends_on:
+      - mongo-database
+
 volumes:
     mongodb_data_container:
 
