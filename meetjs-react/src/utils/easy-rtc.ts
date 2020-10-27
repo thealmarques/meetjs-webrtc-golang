@@ -70,4 +70,8 @@ export class EasyRTC {
   addIceCandidate(candidate: RTCIceCandidate) {
     this.peerConnection.addIceCandidate(candidate);
   }
+
+  disconnect() {
+    this.peerConnection.close();
+  }
 }

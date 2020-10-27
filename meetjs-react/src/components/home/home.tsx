@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useHistory } from "react-router";
 import './home.scss';
 import logo from '../../assets/images/logo.svg';
-import { createSession } from '../../services/api-request.services';
+import { createSession } from '../../services/api.services';
 import { ResponseData } from '../../interfaces/response-data';
 
 export const Home = () => {
@@ -33,7 +33,7 @@ export const Home = () => {
         </div>
       </div>
       <div className="body">
-        <span className="body__title">Do you want free video communications?</span>
+        <span className="body__title">Do you want a free video chat platform?</span>
         <span className="body__sub-title">Get you own URL and share it with others to join you.</span>
         <form onSubmit={onSubmit} className="body__form">
           <div className="body__form__inputs">

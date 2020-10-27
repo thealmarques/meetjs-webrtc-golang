@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react'
 import { useLocation } from "react-router-dom";
-import { verifySocket, connectSession } from '../../services/api-request.services';
+import { verifySocket, connectSession } from '../../services/api.services';
 import logo from '../../assets/images/logo.svg';
 import micOn from '../../assets/images/mic-on.svg';
 import micOff from '../../assets/images/mic-off.svg';
@@ -10,7 +10,7 @@ import view from '../../assets/images/view.svg';
 import { SessionCredentials } from '../session-modal/modal';
 import './meeting.scss';
 import { ResponseData } from '../../interfaces/response-data';
-import { ConnectionSocket } from '../../services/connection-socket.services';
+import { ConnectionSocket } from '../../services/web-socket.services';
 import { generateId } from '../../utils/identifier.utils';
 import { SocketEvent, SocketResponse } from '../../interfaces/socket-data';
 import { State } from '../state-machine/state-machine';
@@ -27,8 +27,9 @@ export const Meeting = () => {
   const [viewMode, setViewMode] = useState<boolean>(false);
   const [connection, setConnection] = useState<ConnectionSocket>();
   const [users, setUsers] = useState<string[]>([]);
+  const [socket, setSocket] = useState<string>('');
   const [url] = useState<string>(location.pathname.split('/meeting/')[1]);
-  const [ localStream, setLocalStream ] = useState<MediaStream>(null);
+  const [ localStream, setLocalStream ] = useState<MediaStream>();
   const localVideo = useRef<HTMLVideoElement>(null);
   const userId = useRef<string>(generateId());
 
@@ -61,7 +62,14 @@ export const Meeting = () => {
 
   const connect = (host: string, password: string) => {
     connectSession(host, password, url).then((response: Response & ResponseData) => {
-      setTitle(response.data.title);
+      if (response.data.title) {
+        setTitle(response.data.title);
+      }
+
+      if (response.data.socket) {
+        setSocket(response.data.socket);
+      }
+
       setState(State.LOGGED);
     }).catch((error) => {
       setState(State.INVALID);
@@ -81,11 +89,13 @@ export const Meeting = () => {
 
   useEffect(() => {
     if (state >= 3) {
-      if (!localVideo.current.srcObject) {
+      if (localVideo.current && !localVideo.current.srcObject) {
         navigator.getUserMedia(
           { audio: true, video: true },
           stream => {
-            localVideo.current.srcObject = stream;
+            if (localVideo.current) {
+              localVideo.current.srcObject = stream;
+            }
             setLocalStream(stream);
 
             setAudio(true);
@@ -122,14 +132,13 @@ export const Meeting = () => {
   useEffect(() => {
     if (state === 3 && connection) {
       connection.send('disconnect', userId.current);
-      setConnection(null);
       setUsers([]);
     }
   }, [state, connection]);
 
   useEffect(() => {
     if (state > 3) {
-      const socketConnection = new ConnectionSocket('ws://localhost:9000/ws');
+      const socketConnection = new ConnectionSocket(`${process.env.REACT_APP_WS_URL}/${socket}`);
       const remoteStreams: MediaStream[] = [];
       const rtcPeerConnection: EasyRTC[] = [];
 
@@ -144,7 +153,10 @@ export const Meeting = () => {
           if (!remoteStreams[data.userID]) {
             remoteStreams[data.userID] = new MediaStream();
           }
-          rtcPeerConnection[data.userID] = new EasyRTC(STUN_SERVERS, localVideo.current.srcObject);
+
+          if (localVideo.current && localVideo.current.srcObject) {
+            rtcPeerConnection[data.userID] = new EasyRTC(STUN_SERVERS, localVideo.current.srcObject as MediaStream);
+          }
           
           rtcPeerConnection[data.userID].onIceCandidate((event: RTCPeerConnectionIceEvent) => {
             if (event.candidate) {
@@ -194,9 +206,13 @@ export const Meeting = () => {
             break
           case 'disconnect':
             if (data.userID !== userId.current) {
-              remoteStreams[data.userID] = null;
-              rtcPeerConnection[data.userID] = null;
-              setUsers((prevState: string[]) => prevState.splice(prevState.indexOf(data.userID), 1));
+              setUsers(prevItems => {
+                const users = [...prevItems];
+                users.splice(users.indexOf(data.userID), 1);
+                return users;
+              });
+              remoteStreams[data.userID] = undefined;
+              rtcPeerConnection[data.userID] = undefined;
             }
             break;
         }
@@ -206,7 +222,7 @@ export const Meeting = () => {
       socketConnection.onMessage(onMessage);
       setConnection(socketConnection);
     }
-  }, [state])
+  }, [state, socket])
 
   return (
     <div className="meeting">
