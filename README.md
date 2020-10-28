@@ -20,9 +20,9 @@ Published an article on Medium's largest active publication (The Startup) - [Rea
 
 ## Examples
 
-<img src="resources/demo1.png" height="50%" width="80%"/>
-<img src="resources/demo2.png" height="50%" width="80%"/>
-<img src="resources/demo3.png" height="50%" width="80%"/>
+<img src="resource/demo1.png" height="50%" width="80%"/>
+<img src="resource/demo2.png" height="50%" width="80%"/>
+<img src="resource/demo3.png" height="50%" width="80%"/>
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
