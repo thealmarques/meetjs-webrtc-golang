@@ -28,8 +28,7 @@ export const Home = () => {
           <span className="header__left__text">MeetJS</span>
         </div>
         <div className="header__right">
-          <span className="header__right__margin">Github</span>
-          <span>About</span>
+          <a href='https://github.com/thealmarques/meetjs-webrtc-golang' className="header__right__margin">Github</a>
         </div>
       </div>
       <div className="body">

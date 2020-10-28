@@ -232,8 +232,7 @@ export const Meeting = () => {
           <span className="meeting__header__left__text">MeetJS</span>
         </div>
         <div className="meeting__header__right">
-          <span className="meeting__header__right__margin">Github</span>
-          <span>About</span>
+          <a href='https://github.com/thealmarques/meetjs-webrtc-golang' className="meeting__header__right__margin">Github</a>
         </div>
       </div>
       <div className="meeting__body">
