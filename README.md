@@ -17,6 +17,13 @@ Published an article on Medium's largest active publication (The Startup) - [Rea
 * Sass (BEM methodology)
 * Golang + Gin
 * Gorilla Websockets
+* MongoDB
+
+## Backend Architecture
+
+<img src="resource/architecture.png" height="30%" width="50%"/>
+
+When a user creates a session he'll receive a unique hashed URL whereas he can share with others to join the meeting (upon credentials are validated).
 
 ## Examples
 
