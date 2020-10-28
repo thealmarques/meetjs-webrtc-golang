@@ -1,0 +1,29 @@
+{
+  "files": {
+    "main.css": "/static/css/main.1c22c7f4.chunk.css",
+    "main.js": "/static/js/main.b9b3f9bf.chunk.js",
+    "main.js.map": "/static/js/main.b9b3f9bf.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.d3070e05.js",
+    "runtime-main.js.map": "/static/js/runtime-main.d3070e05.js.map",
+    "static/js/2.d8ce8405.chunk.js": "/static/js/2.d8ce8405.chunk.js",
+    "static/js/2.d8ce8405.chunk.js.map": "/static/js/2.d8ce8405.chunk.js.map",
+    "index.html": "/index.html",
+    "precache-manifest.3f14f89069d6a124af8a3d5c71b941eb.js": "/precache-manifest.3f14f89069d6a124af8a3d5c71b941eb.js",
+    "service-worker.js": "/service-worker.js",
+    "static/css/main.1c22c7f4.chunk.css.map": "/static/css/main.1c22c7f4.chunk.css.map",
+    "static/js/2.d8ce8405.chunk.js.LICENSE.txt": "/static/js/2.d8ce8405.chunk.js.LICENSE.txt",
+    "static/media/App.scss": "/static/media/Quicksand_Book.dd2da1d8.otf",
+    "static/media/cam-off.svg": "/static/media/cam-off.60765bda.svg",
+    "static/media/cam-on.svg": "/static/media/cam-on.a9c7e91b.svg",
+    "static/media/logo.svg": "/static/media/logo.acb38cf1.svg",
+    "static/media/mic-off.svg": "/static/media/mic-off.99246803.svg",
+    "static/media/mic-on.svg": "/static/media/mic-on.5ce2865f.svg",
+    "static/media/view.svg": "/static/media/view.d319b0ef.svg"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.d3070e05.js",
+    "static/js/2.d8ce8405.chunk.js",
+    "static/css/main.1c22c7f4.chunk.css",
+    "static/js/main.b9b3f9bf.chunk.js"
+  ]
+}

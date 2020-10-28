@@ -5,8 +5,6 @@ COPY package.json package-lock.json ./
 RUN npm install
 
 ENV PATH="./node_modules/.bin:$PATH"
-ENV REACT_APP_WS_URL="ws://localhost:9000/ws"
-ENV REACT_APP_SERVER="http://localhost:9000"
 
 COPY . ./
 

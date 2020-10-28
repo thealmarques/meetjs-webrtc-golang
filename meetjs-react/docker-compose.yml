@@ -9,5 +9,8 @@ services:
     volumes:
       - '.:/app'
       - '/app/node_modules'
+    environment:
+      SERVER_URL: http://3.138.188.169:9000
+      WS_URL: ws://3.138.188.169:9000/ws
     ports:
       - 3000:80

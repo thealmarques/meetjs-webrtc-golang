@@ -29,7 +29,7 @@ export const Meeting = () => {
   const [users, setUsers] = useState<string[]>([]);
   const [socket, setSocket] = useState<string>('');
   const [url] = useState<string>(location.pathname.split('/meeting/')[1]);
-  const [ localStream, setLocalStream ] = useState<MediaStream>();
+  const [localStream, setLocalStream] = useState<MediaStream>();
   const localVideo = useRef<HTMLVideoElement>(null);
   const userId = useRef<string>(generateId());
 
@@ -90,19 +90,19 @@ export const Meeting = () => {
   useEffect(() => {
     if (state >= 3) {
       if (localVideo.current && !localVideo.current.srcObject) {
-        navigator.getUserMedia(
-          { audio: true, video: true },
-          stream => {
-            if (localVideo.current) {
-              localVideo.current.srcObject = stream;
-            }
-            setLocalStream(stream);
+        navigator.mediaDevices.getUserMedia(
+          { audio: true, video: true }
+        ).then(stream => {
+          if (localVideo.current) {
+            localVideo.current.srcObject = stream;
+          }
+          setLocalStream(stream);
 
-            setAudio(true);
-            setVideo(true);
-          },
-          error => console.warn(error.message)
-        );
+          setAudio(true);
+          setVideo(true);
+        }).catch(error => {
+          console.log(error);
+        });
       }
     }
   }, [state]);
@@ -148,8 +148,8 @@ export const Meeting = () => {
 
       const onMessage = (event: Event & SocketEvent) => {
         const data: SocketResponse = JSON.parse(event.data);
-        
-        if (!rtcPeerConnection[data.userID] && userId.current !== data.userID) {    
+
+        if (!rtcPeerConnection[data.userID] && userId.current !== data.userID) {
           if (!remoteStreams[data.userID]) {
             remoteStreams[data.userID] = new MediaStream();
           }
@@ -157,7 +157,7 @@ export const Meeting = () => {
           if (localVideo.current && localVideo.current.srcObject) {
             rtcPeerConnection[data.userID] = new EasyRTC(STUN_SERVERS, localVideo.current.srcObject as MediaStream);
           }
-          
+
           rtcPeerConnection[data.userID].onIceCandidate((event: RTCPeerConnectionIceEvent) => {
             if (event.candidate) {
               socketConnection.candidate(event.candidate, userId.current);
@@ -167,7 +167,7 @@ export const Meeting = () => {
           rtcPeerConnection[data.userID].onTrack((event: RTCTrackEvent) => {
             const mediaStream: MediaStream = remoteStreams[data.userID];
             mediaStream.addTrack(event.track);
-            
+
             const element = document.getElementById(`${data.userID}-video`) as HTMLMediaElement;
             element.srcObject = mediaStream;
           });
@@ -275,7 +275,7 @@ export const Meeting = () => {
                 {
                   state === State.JOINED &&
                   <span className="meeting__body__bar__right-bar__count">{users.length} online users</span>
-              }
+                }
                 <img className="meeting__body__bar__right-bar__icon" src={view} alt="Change view" onClick={() => setViewMode(!viewMode)} />
                 <img className="meeting__body__bar__right-bar__icon" src={audio ? micOn : micOff} alt="Mic" onClick={() => setAudio(!audio)} />
                 <img className="meeting__body__bar__right-bar__icon" src={video ? camOn : camOff} alt="Webcam" onClick={() => setVideo(!video)} />

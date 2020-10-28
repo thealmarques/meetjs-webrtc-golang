@@ -69,8 +69,8 @@ typings/
 .yarn-integrity
 
 # dotenv environment variables file
-.env
-.env.test
+.env.development
+.env.production
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -104,3 +104,5 @@ dist
 .tern-port
 
 .DS_STORE
+
+terraform.tfvars
